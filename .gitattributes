@@ -1,0 +1,13 @@
+# Normaliza finales de linea: evita que los scripts/configs que corren
+# dentro de contenedores Linux se commiteen con CRLF desde Windows.
+* text=auto eol=lf
+
+*.sh      text eol=lf
+Dockerfile text eol=lf
+*.yml     text eol=lf
+*.yaml    text eol=lf
+*.py      text eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary

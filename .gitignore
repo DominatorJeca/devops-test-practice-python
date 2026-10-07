@@ -1,0 +1,54 @@
+# ── Python ────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.Python
+build/
+dist/
+
+# ── Entornos virtuales ────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Django ────────────────────────────────────────────
+*.log
+*.pot
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/media/
+
+# ── Secretos / configuración local ────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+k8s/**/secret.yaml
+!k8s/**/secret.example.yaml
+
+# ── Tests / cobertura ─────────────────────────────────
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.pytest_cache/
+.tox/
+
+# ── Terraform ─────────────────────────────────────────
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform.lock.hcl
+
+# ── IDE / SO ──────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+Desktop.ini
