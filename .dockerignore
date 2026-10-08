@@ -1,0 +1,35 @@
+# Entornos virtuales y control de versiones
+.venv/
+venv/
+.git/
+.github/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Artefactos locales
+db.sqlite3
+staticfiles/
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# Infra
+k8s/
+terraform/
+docs/
+docker-compose.yml
+*.md
+!README.md
+
+# IDE
+.vscode/
+.idea/
