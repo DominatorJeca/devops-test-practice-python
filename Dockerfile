@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-From python:3.11-slim AS builder
+FROM python:3.11-slim-trixie AS builder
 
 ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
@@ -10,9 +10,11 @@ WORKDIR /app
 COPY requirements.txt .
 RUN python -m venv /opt/venv && \
     /opt/venv/bin/pip install --upgrade pip && \
-    /opt/venv/bin/pip install -r requirements.txt
+    /opt/venv/bin/pip install -r requirements.txt && \
+    /opt/venv/bin/pip uninstall -y pip setuptools wheel
 
-FROM python:3.11-slim AS runtime
+
+FROM python:3.11-slim-trixie AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -24,7 +26,7 @@ RUN groupadd --system --gid 1001 appgroup && \
     useradd --system --uid 1001 --gid appgroup --no-create-home appuser
 
 WORKDIR /app
-
+RUN /usr/local/bin/python -m pip uninstall -y pip setuptools wheel
 COPY --from=builder /opt/venv /opt/venv
 COPY --chown=appuser:appgroup . .
 COPY --chown=appuser:appgroup entrypoint.sh /entrypoint.sh
