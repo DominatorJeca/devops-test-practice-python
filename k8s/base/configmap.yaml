@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demo-config
+data:
+  DJANGO_DEBUG: "False"
+  DJANGO_ALLOWED_HOSTS: "demo-devops.local,localhost,127.0.0.1"
+  DJANGO_LOG_LEVEL: "INFO"
+  DB_ENGINE: "postgres"
+  DB_NAME: "demo"
+  DB_USER: "demo"
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  RUN_MIGRATIONS: "false"
