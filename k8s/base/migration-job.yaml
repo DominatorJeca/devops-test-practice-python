@@ -28,6 +28,14 @@ spec:
             - name: RUN_MIGRATIONS
               value: "true"
           args: ["echo", "[job] migraciones aplicadas"]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

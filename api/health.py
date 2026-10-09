@@ -1,9 +1,11 @@
 from django.db import connection
 from django.http import JsonResponse
 
+
 def liveness(request):
     """Pod saludable"""
     return JsonResponse({'status': 'ok'})
+
 
 def readiness(request):
     try:

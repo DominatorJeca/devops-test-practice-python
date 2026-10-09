@@ -3,6 +3,7 @@ from .models import User
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
+
 class TestUserView(APITestCase):
     def setUp(self):
         self.user = User.objects.create(name='Test1', dni='09876543210')
@@ -44,6 +45,7 @@ class TestUserView(APITestCase):
     def test_get_unknown_id_returns_404(self):
         response = self.client.get(f'{self.url}{self.user.id + 999}/')
         self.assertEqual(response.status_code, 404)
+
 
 class TestHealthEndpoints(APITestCase):
     def test_liveness(self):
