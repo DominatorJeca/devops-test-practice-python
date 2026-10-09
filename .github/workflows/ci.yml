@@ -240,6 +240,18 @@ jobs:
       - name: Esperar al rollout de las replicas
         run: kubectl rollout status deployment/demo-api -n devsu-demo --timeout=300s
 
+      - name: Esperar que Ingress enrute trafico(solucion a error previo)
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS -o /dev/null -H "Host: demo-devops.local" http://localhost/api/health/; then
+              echo "Ingress enrutando correctamente (intento $i)"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "El Ingress no enruto trafico en 60 segundos"
+          exit 1
+
       - name: Smoke test contra el Ingress
         run: |
           set -eo pipefail
