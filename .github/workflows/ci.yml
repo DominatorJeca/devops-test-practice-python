@@ -193,3 +193,75 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: '0'
           format: table
+  deploy:
+    name: Deploy Kubernetes
+    runs-on: ubuntu-latest
+    needs: [image, scan]
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Crear cluster kind efimero
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: ci
+          config: .github/kind-config.yaml
+
+      - name: Instalar ingress-nginx
+        run: |
+          kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+          kubectl wait --namespace ingress-nginx \
+            --for=condition=ready pod \
+            --selector=app.kubernetes.io/component=controller \
+            --timeout=240s
+
+      - name: Instalar kustomize
+        run: |
+          curl -sS "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+
+      - name: Fijar la imagen construida en esta ejecucion
+        working-directory: k8s/overlays/ci
+        run: kustomize edit set image devsu-demo=${{ needs.image.outputs.image }}
+
+      - name: Precargar la imagen en nodo
+        run: |
+          docker pull ${{ needs.image.outputs.image }}
+          kind load docker-image ${{ needs.image.outputs.image }} --name ci
+
+      - name: Desplegar
+        run: kubectl apply -k k8s/overlays/ci
+
+      - name: Esperar a las migraciones
+        run: kubectl wait --for=condition=complete job/demo-migrate -n devsu-demo --timeout=300s
+
+      - name: Esperar al rollout de las replicas
+        run: kubectl rollout status deployment/demo-api -n devsu-demo --timeout=300s
+
+      - name: Smoke test contra el Ingress
+        run: |
+          set -eo pipefail
+          echo "── health ──"
+          curl -fsS -H "Host: demo-devops.local" http://localhost/api/health/; echo
+          echo "── ready ──"
+          curl -fsS -H "Host: demo-devops.local" http://localhost/api/ready/; echo
+          echo "── crear usuario ──"
+          curl -fsS -X POST http://localhost/api/users/ \
+            -H "Host: demo-devops.local" \
+            -H "Content-Type: application/json" \
+            -d '{"dni":"9999999999","name":"Smoke Test CI"}'; echo
+          echo "── listar usuarios ──"
+          curl -fsS -H "Host: demo-devops.local" http://localhost/api/users/; echo
+
+      - name: Estado final del cluster
+        run: kubectl get all,ingress,hpa,pdb,netpol -n devsu-demo
+
+      - name: Diagnostico por fallo
+        if: failure()
+        run: |
+          kubectl get pods -n devsu-demo -o wide || true
+          kubectl describe pods -n devsu-demo || true
+          kubectl logs -n devsu-demo -l app.kubernetes.io/name=demo-api --tail=100 || true
+          kubectl logs -n devsu-demo job/demo-migrate --tail=100 || true

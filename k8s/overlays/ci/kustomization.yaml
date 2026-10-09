@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: devsu-demo
+
+resources:
+  - ../local
+
+images:
+  - name: devsu-demo
+    newName: ghcr.io/dominatorjeca/devops-test-practice-python
+    newTag: latest
